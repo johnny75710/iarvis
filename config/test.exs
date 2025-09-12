@@ -6,8 +6,8 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :iarvis, Iarvis.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "demo_user",
+  password: "demo_pass",
   hostname: "localhost",
   database: "iarvis_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
