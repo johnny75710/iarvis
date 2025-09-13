@@ -1,0 +1,469 @@
+openapi: 3.0.3
+info:
+  title: Iarvis Blog API
+  version: "1.0.0"
+  description: API REST para interactuar con Posts, Categories, Tags, Comments y Media (Phoenix API-only, binary_id)
+servers:
+  - url: /api
+paths:
+  /posts:
+    get:
+      summary: Listar artículos
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Lista de artículos paginada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+    post:
+      summary: Crear artículo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                post:
+                  $ref: '#/components/schemas/PostCreate'
+      responses:
+        "201":
+          description: Artículo creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+  /categories:
+      get:
+        summary: Listar categorías
+        parameters:
+          - name: limit
+            in: query
+            description: Número máximo de categorías a devolver
+            schema:
+              type: integer
+              default: 100
+          - name: offset
+            in: query
+            description: Número de categorías a saltar
+            schema:
+              type: integer
+              default: 0
+            schema:
+              type: string
+              format: uuid
+        responses:
+          "200":
+            description: Lista de categorías con metadatos de paginación
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Category'
+                    meta:
+                      type: object
+                      properties:
+                        pagination:
+                          type: object
+                          properties:
+                            limit:
+                              type: integer
+                            offset:
+                              type: integer
+                            total_count:
+                              type: integer
+                            has_more:
+                              type: boolean
+                            last_id:
+                              type: string
+                              format: uuid
+                              nullable: true
+      responses:
+        "201":
+          description: Categoría creada o actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+  /categories/{id}/posts:
+    get:
+      summary: Obtener artículos de una categoría
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Lista de artículos de la categoría
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+  /tags:
+    get:
+      summary: Listar tags
+      responses:
+        "200":
+          description: Lista de tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+    post:
+      summary: Crear tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tag:
+                  $ref: '#/components/schemas/TagCreate'
+      responses:
+        "201":
+          description: Tag creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+  /tags/{id}/posts:
+    get:
+      summary: Obtener artículos de un tag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Lista de artículos con el tag
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+  /comments:
+    get:
+      summary: Listar comentarios
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Lista de comentarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+    post:
+      summary: Crear comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  $ref: '#/components/schemas/CommentCreate'
+      responses:
+        "201":
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+  /posts/{id}/comments:
+    get:
+      summary: Obtener comentarios de un post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Lista de comentarios del post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+  /media:
+    post:
+      summary: Subir imagen
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                alt_text:
+                  type: string
+      responses:
+        "201":
+          description: Imagen subida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+components:
+  schemas:
+    PostCreate:
+      type: object
+      required:
+        - title
+        - slug
+        - content
+        - author_name
+        - status
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        author_name:
+          type: string
+        author_email:
+          type: string
+        category_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [draft, published]
+    Post:
+      allOf:
+        - $ref: '#/components/schemas/PostCreate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            inserted_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    CategoryCreate:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+    Category:
+      allOf:
+        - $ref: '#/components/schemas/CategoryCreate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            inserted_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    TagCreate:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+    Tag:
+      allOf:
+        - $ref: '#/components/schemas/TagCreate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            inserted_at:
+              type: string
+              format: date-time
+    CommentCreate:
+      type: object
+      required:
+        - post_id
+        - author_name
+        - content
+      properties:
+        post_id:
+          type: string
+          format: uuid
+        author_name:
+          type: string
+        author_email:
+          type: string
+        author_website:
+          type: string
+        content:
+          type: string
+        parent_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+    Comment:
+      allOf:
+        - $ref: '#/components/schemas/CommentCreate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            inserted_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    Media:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        original_name:
+          type: string
+        file_path:
+          type: string
+        file_size:
+          type: integer
+        mime_type:
+          type: string
+        alt_text:
+          type: string
+        inserted_at:
+          type: string
+          format: date-time
