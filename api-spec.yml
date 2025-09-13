@@ -55,54 +55,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/Post'
   /categories:
-      get:
-        summary: Listar categorías
-        parameters:
-          - name: limit
-            in: query
-            description: Número máximo de categorías a devolver
+    get:
+      summary: Listar categorías
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de categorías a devolver
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: Número de categorías a saltar
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Lista de categorías con metadatos de paginación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                          offset:
+                            type: integer
+                          total_count:
+                            type: integer
+                          has_more:
+                            type: boolean
+                          last_id:
+                            type: string
+                            format: uuid
+                            nullable: true
+    post:
+      summary: Crear o actualizar categoría (upsert)
+      requestBody:
+        required: true
+        content:
+          application/json:
             schema:
-              type: integer
-              default: 100
-          - name: offset
-            in: query
-            description: Número de categorías a saltar
-            schema:
-              type: integer
-              default: 0
-            schema:
-              type: string
-              format: uuid
-        responses:
-          "200":
-            description: Lista de categorías con metadatos de paginación
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    data:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Category'
-                    meta:
-                      type: object
-                      properties:
-                        pagination:
-                          type: object
-                          properties:
-                            limit:
-                              type: integer
-                            offset:
-                              type: integer
-                            total_count:
-                              type: integer
-                            has_more:
-                              type: boolean
-                            last_id:
-                              type: string
-                              format: uuid
-                              nullable: true
+              type: object
+              properties:
+                category:
+                  $ref: '#/components/schemas/CategoryCreate'
       responses:
         "201":
           description: Categoría creada o actualizada

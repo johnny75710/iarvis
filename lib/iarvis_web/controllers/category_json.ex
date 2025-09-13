@@ -6,7 +6,7 @@ defmodule IarvisWeb.CategoryJSON do
   """
   def index(%{categories: categories, pagination: pagination}) do
     %{
-      data: for(category <- categories, do: data(category)),
+      categories: for(category <- categories, do: data(category)),
       meta: %{
         pagination: %{
           limit: pagination.limit,

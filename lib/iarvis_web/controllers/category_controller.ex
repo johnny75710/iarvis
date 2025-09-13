@@ -40,7 +40,7 @@ defmodule IarvisWeb.CategoryController do
     with {:ok, %Category{} = category} <- Blog.create_category(category_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/category/#{category}")
+      |> put_resp_header("location", ~p"/api/categories/#{category.id}")
       |> render(:show, category: category)
     end
   end
