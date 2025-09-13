@@ -17,8 +17,22 @@ defmodule Iarvis.Blog do
       [%Category{}, ...]
 
   """
-  def list_categories do
-    Repo.all(Category)
+  def list_categories(opts \\ []) do
+    limit = Keyword.get(opts, :limit, 100)
+    offset = Keyword.get(opts, :offset, 0)
+
+    Category
+    |> order_by([c], c.name)
+    |> limit(^limit)
+    |> offset(^offset)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the total count of categories
+  """
+  def count_categories do
+    Repo.aggregate(Category, :count, :id)
   end
 
   @doc """
@@ -58,6 +72,7 @@ defmodule Iarvis.Blog do
           %Category{}
           |> Category.changeset(attrs)
           |> Repo.insert()
+
         category ->
           {:ok, category}
       end

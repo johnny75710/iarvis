@@ -35,7 +35,12 @@ defmodule Iarvis.BlogTest do
 
     test "update_category/2 with valid data updates the category" do
       category = category_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        slug: "some updated slug"
+      }
 
       assert {:ok, %Category{} = category} = Blog.update_category(category, update_attrs)
       assert category.name == "some updated name"
