@@ -15,5 +15,7 @@ defmodule IarvisWeb.Router do
   get "/posts", PostController, :index
   get "/posts/:id", PostController, :show
   post "/posts", PostController, :create
+
+  resources "/tags", TagController, except: [:new, :edit]
   end
 end
