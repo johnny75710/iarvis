@@ -11,5 +11,9 @@ defmodule IarvisWeb.Router do
   get "/categories", CategoryController, :index
   get "/categories/:id", CategoryController, :show
   post "/categories", CategoryController, :create
+
+  get "/posts", PostController, :index
+  get "/posts/:id", PostController, :show
+  post "/posts", PostController, :create
   end
 end

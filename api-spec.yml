@@ -10,16 +10,18 @@ paths:
     get:
       summary: Listar artículos
       parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
         - name: limit
           in: query
+          description: Número máximo de artículos a devolver
           schema:
             type: integer
             default: 10
+        - name: offset
+          in: query
+          description: Número de artículos a omitir
+          schema:
+            type: integer
+            default: 0
       responses:
         "200":
           description: Lista de artículos paginada
@@ -28,14 +30,28 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
+                  posts:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                          offset:
+                            type: integer
+                          total_count:
+                            type: integer
+                          has_more:
+                            type: boolean
+                          last_id:
+                            type: string
+                            format: uuid
+                            nullable: true
     post:
       summary: Crear artículo
       requestBody:
@@ -53,7 +69,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                type: object
+                properties:
+                  post:
+                    $ref: '#/components/schemas/Post'
   /categories:
     get:
       summary: Listar categorías
@@ -66,7 +85,7 @@ paths:
             default: 100
         - name: offset
           in: query
-          description: Número de categorías a saltar
+          description: Número de categorías a omitir
           schema:
             type: integer
             default: 0
@@ -118,6 +137,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Category'
+  /posts/{id}:
+    get:
+      summary: Obtener un artículo específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Detalles del artículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post:
+                    $ref: '#/components/schemas/Post'
+  /categories/{id}:
+    get:
+      summary: Obtener una categoría específica
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Detalles de la categoría
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: '#/components/schemas/Category'
   /categories/{id}/posts:
     get:
       summary: Obtener artículos de una categoría

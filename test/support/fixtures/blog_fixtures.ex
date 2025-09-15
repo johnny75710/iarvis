@@ -29,4 +29,33 @@ defmodule Iarvis.BlogFixtures do
 
     category
   end
+
+  @doc """
+  Generate a unique post slug.
+  """
+  def unique_post_slug, do: "some slug#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a post.
+  """
+  def post_fixture(attrs \\ %{}) do
+    {:ok, post} =
+      attrs
+      |> Enum.into(%{
+        author_email: "some author_email",
+        author_name: "some author_name",
+        content: "some content",
+        excerpt: "some excerpt",
+        featured_image: "some featured_image",
+        is_featured: true,
+        published_at: ~U[2025-09-12 21:33:00Z],
+        slug: unique_post_slug(),
+        status: "some status",
+        title: "some title",
+        view_count: 42
+      })
+      |> Iarvis.Blog.create_post()
+
+    post
+  end
 end
