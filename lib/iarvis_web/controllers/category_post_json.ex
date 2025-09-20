@@ -1,8 +1,8 @@
-defmodule IarvisWeb.PostJSON do
+defmodule IarvisWeb.CategoryPostJSON do
   alias Iarvis.Blog.Post
 
   @doc """
-  Renders a list of posts.
+  Renders a list of posts for a category.
   """
   def index(%{posts: posts, pagination: pagination}) do
     %{
@@ -17,13 +17,6 @@ defmodule IarvisWeb.PostJSON do
         }
       }
     }
-  end
-
-  @doc """
-  Renders a single post.
-  """
-  def show(%{post: post}) do
-    %{post: data(post)}
   end
 
   defp data(%Post{} = post) do

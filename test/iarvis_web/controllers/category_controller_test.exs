@@ -16,18 +16,19 @@ defmodule IarvisWeb.CategoryControllerTest do
 
   describe "index" do
     test "lists all categories with empty data", %{conn: conn} do
-  conn = get(conn, ~p"/api/categories")
+      conn = get(conn, ~p"/api/categories")
       response = json_response(conn, 200)
 
       # Verificar estructura de respuesta
       assert %{"categories" => [], "meta" => %{"pagination" => pagination}} = response
+
       assert %{
-        "limit" => 100,
-        "offset" => 0,
-        "total_count" => 0,
-        "has_more" => false,
-        "last_id" => nil
-      } = pagination
+               "limit" => 100,
+               "offset" => 0,
+               "total_count" => 0,
+               "has_more" => false,
+               "last_id" => nil
+             } = pagination
     end
 
     test "lists categories with correct pagination", %{conn: conn} do
@@ -37,7 +38,7 @@ defmodule IarvisWeb.CategoryControllerTest do
       category_fixture(%{name: "Category C", slug: "category-c"})
 
       # Probar con limit=2 para forzar paginación
-  conn = get(conn, ~p"/api/categories?limit=2&offset=0")
+      conn = get(conn, ~p"/api/categories?limit=2&offset=0")
       response = json_response(conn, 200)
 
       # Verificar que hay 2 categorías en la respuesta
@@ -52,7 +53,7 @@ defmodule IarvisWeb.CategoryControllerTest do
       assert pagination["last_id"] != nil
 
       # Verificar segunda página
-  conn = get(conn, ~p"/api/categories?limit=2&offset=2")
+      conn = get(conn, ~p"/api/categories?limit=2&offset=2")
       response = json_response(conn, 200)
 
       assert %{"categories" => data, "meta" => %{"pagination" => pagination}} = response
@@ -63,10 +64,10 @@ defmodule IarvisWeb.CategoryControllerTest do
 
   describe "create category" do
     test "renders category when data is valid", %{conn: conn} do
-  conn = post(conn, ~p"/api/categories", category: @create_attrs)
-  assert %{"id" => id} = json_response(conn, 201)["category"]
+      conn = post(conn, ~p"/api/categories", category: @create_attrs)
+      assert %{"id" => id} = json_response(conn, 201)["category"]
 
-  conn = get(conn, ~p"/api/categories/#{id}")
+      conn = get(conn, ~p"/api/categories/#{id}")
 
       assert %{
                "id" => ^id,
@@ -77,7 +78,7 @@ defmodule IarvisWeb.CategoryControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-  conn = post(conn, ~p"/api/categories", category: @invalid_attrs)
+      conn = post(conn, ~p"/api/categories", category: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end

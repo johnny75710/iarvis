@@ -8,14 +8,15 @@ defmodule IarvisWeb.Router do
   scope "/api", IarvisWeb do
     pipe_through :api
 
-  get "/categories", CategoryController, :index
-  get "/categories/:id", CategoryController, :show
-  post "/categories", CategoryController, :create
+    get "/categories", CategoryController, :index
+    get "/categories/:id", CategoryController, :show
+    post "/categories", CategoryController, :create
+    get "/categories/:id/posts", CategoryPostController, :index
 
-  get "/posts", PostController, :index
-  get "/posts/:id", PostController, :show
-  post "/posts", PostController, :create
+    get "/posts", PostController, :index
+    get "/posts/:id", PostController, :show
+    post "/posts", PostController, :create
 
-  resources "/tags", TagController, except: [:new, :edit]
+    resources "/tags", TagController, except: [:new, :edit]
   end
 end

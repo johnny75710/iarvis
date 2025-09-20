@@ -130,6 +130,10 @@ defmodule Iarvis.Blog do
     Category.changeset(category, attrs)
   end
 
+  def category_exists?(name) when is_binary(name) do
+    Repo.get_by(Category, name: name) != nil
+  end
+
   alias Iarvis.Blog.Post
 
   @doc """
@@ -157,6 +161,30 @@ defmodule Iarvis.Blog do
   """
   def count_posts do
     Repo.aggregate(Post, :count, :id)
+  end
+
+  @doc """
+  Returns a list of posts by category id with pagination.
+  """
+  def list_posts_by_category_id(category_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 10)
+    offset = Keyword.get(opts, :offset, 0)
+
+    Post
+    |> where([p], p.category_id == ^category_id)
+    |> order_by([p], desc: p.published_at)
+    |> limit(^limit)
+    |> offset(^offset)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the total count of posts in a category.
+  """
+  def count_posts_by_category_id(category_id) do
+    Post
+    |> where([p], p.category_id == ^category_id)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -188,6 +216,19 @@ defmodule Iarvis.Blog do
 
   """
   def create_post(attrs \\ %{}) do
+    attrs =
+      if category_name?(attrs) do
+        category_name = extract_category_name(attrs)
+        {:ok, category} = create_category(%{
+              name: category_name,
+              description: "Auto generated description for: #{category_name}",
+              slug: String.replace(String.trim(category_name), " ", "-")
+            })
+        insert_category_id(attrs, category.id)
+      else
+        attrs
+      end
+
     %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
@@ -334,5 +375,30 @@ defmodule Iarvis.Blog do
   """
   def change_tag(%Tag{} = tag, attrs \\ %{}) do
     Tag.changeset(tag, attrs)
+  end
+
+  defp remove_category_name(attrs) do
+    Map.drop(attrs, ["category_name", :category_name])
+  end
+
+  defp extract_category_name(attrs) do
+    Map.get(attrs, "category_name") || Map.get(attrs, :category_name)
+  end
+
+  defp category_name?(attrs) do
+    case extract_category_name(attrs) do
+      name when is_binary(name) -> true
+      _ -> false
+    end
+  end
+
+  defp insert_category_id(attrs, category_id) do
+    attrs = remove_category_name(attrs)
+
+    if Map.has_key?(attrs, "title") do
+      Map.put(attrs, "category_id", category_id)
+    else
+      Map.put(attrs, :category_id, category_id)
+    end
   end
 end

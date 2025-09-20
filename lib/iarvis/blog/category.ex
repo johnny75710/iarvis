@@ -10,6 +10,8 @@ defmodule Iarvis.Blog.Category do
     field :slug, :string
     field :parent_id, :binary_id
 
+    has_many :posts, Iarvis.Blog.Post
+
     timestamps(type: :utc_datetime)
   end
 

@@ -71,7 +71,19 @@ defmodule Iarvis.BlogTest do
 
     import Iarvis.BlogFixtures
 
-    @invalid_attrs %{status: nil, title: nil, slug: nil, content: nil, excerpt: nil, featured_image: nil, author_name: nil, author_email: nil, is_featured: nil, view_count: nil, published_at: nil}
+    @invalid_attrs %{
+      status: nil,
+      title: nil,
+      slug: nil,
+      content: nil,
+      excerpt: nil,
+      featured_image: nil,
+      author_name: nil,
+      author_email: nil,
+      is_featured: nil,
+      view_count: nil,
+      published_at: nil
+    }
 
     test "list_posts/0 returns all posts" do
       post = post_fixture()
@@ -84,10 +96,21 @@ defmodule Iarvis.BlogTest do
     end
 
     test "create_post/1 with valid data creates a post" do
-      valid_attrs = %{status: "some status", title: "some title", slug: "some slug", content: "some content", excerpt: "some excerpt", featured_image: "some featured_image", author_name: "some author_name", author_email: "some author_email", is_featured: true, view_count: 42, published_at: ~U[2025-09-12 21:33:00Z]}
+      valid_attrs = %{
+        title: "some title",
+        slug: "some slug",
+        content: "some content",
+        excerpt: "some excerpt",
+        featured_image: "some featured_image",
+        author_name: "some author_name",
+        author_email: "some author_email",
+        status: "published",
+        is_featured: true,
+        view_count: 42,
+        published_at: ~U[2025-09-12 21:33:00Z]
+      }
 
       assert {:ok, %Post{} = post} = Blog.create_post(valid_attrs)
-      assert post.status == "some status"
       assert post.title == "some title"
       assert post.slug == "some slug"
       assert post.content == "some content"
@@ -95,6 +118,7 @@ defmodule Iarvis.BlogTest do
       assert post.featured_image == "some featured_image"
       assert post.author_name == "some author_name"
       assert post.author_email == "some author_email"
+      assert post.status == "published"
       assert post.is_featured == true
       assert post.view_count == 42
       assert post.published_at == ~U[2025-09-12 21:33:00Z]
@@ -104,9 +128,117 @@ defmodule Iarvis.BlogTest do
       assert {:error, %Ecto.Changeset{}} = Blog.create_post(@invalid_attrs)
     end
 
+    test "create_post/1 with category_id creates a post linked to existing category" do
+      # Primero creamos una categoría
+      {:ok, category} = Blog.create_category(%{
+        name: "Test Category",
+        description: "Test Description",
+        slug: "test-category"
+      })
+
+      valid_attrs = %{
+        title: "Post with Category",
+        slug: "post-with-category",
+        content: "Test content",
+        excerpt: "Post excerpt",
+        featured_image: "test_image.jpg",
+        author_name: "Test Author",
+        author_email: "test@example.com",
+        status: "published",
+        is_featured: false,
+        view_count: 0,
+        published_at: ~U[2025-09-12 21:33:00Z],
+        category_id: category.id
+      }
+
+      assert {:ok, %Post{} = post} = Blog.create_post(valid_attrs)
+      assert post.category_id == category.id
+      assert post.title == "Post with Category"
+    end
+
+    test "create_post/1 with category_name creates a new category and links the post" do
+      # Verificamos que la categoría no existe inicialmente
+      refute Blog.category_exists?("New Category")
+
+      valid_attrs = %{
+        title: "Post with New Category",
+        slug: "post-with-new-category",
+        content: "Test content",
+        excerpt: "Post excerpt",
+        featured_image: "test_image.jpg",
+        author_name: "Test Author",
+        author_email: "test@example.com",
+        status: "published",
+        is_featured: false,
+        view_count: 0,
+        published_at: ~U[2025-09-12 21:33:00Z],
+        category_name: "New Category"
+      }
+
+      assert {:ok, %Post{} = post} = Blog.create_post(valid_attrs)
+
+      # Verificamos que el post se creó correctamente
+      assert post.title == "Post with New Category"
+      assert post.category_id != nil
+
+      # Verificamos que la categoría se creó automáticamente
+      assert Blog.category_exists?("New Category")
+
+      # Verificamos que el post está vinculado a la nueva categoría
+      category = Blog.get_category!(post.category_id)
+      assert category.name == "New Category"
+    end
+
+    test "create_post/1 with category_name uses existing category if it already exists" do
+      # Primero creamos una categoría
+      {:ok, existing_category} = Blog.create_category(%{
+        name: "Existing Category",
+        description: "Existing Description",
+        slug: "existing-category"
+      })
+
+      valid_attrs = %{
+        title: "Post with Existing Category Name",
+        slug: "post-with-existing-category",
+        content: "Test content",
+        excerpt: "Post excerpt",
+        featured_image: "test_image.jpg",
+        author_name: "Test Author",
+        author_email: "test@example.com",
+        status: "published",
+        is_featured: false,
+        view_count: 0,
+        published_at: ~U[2025-09-12 21:33:00Z],
+        category_name: "Existing Category"
+      }
+
+      assert {:ok, %Post{} = post} = Blog.create_post(valid_attrs)
+
+      # Verificamos que usa la categoría existente
+      assert post.category_id == existing_category.id
+
+      # Verificamos que no se creó una categoría duplicada
+      categories = Blog.list_categories()
+      existing_categories = Enum.filter(categories, fn c -> c.name == "Existing Category" end)
+      assert length(existing_categories) == 1
+    end
+
     test "update_post/2 with valid data updates the post" do
       post = post_fixture()
-      update_attrs = %{status: "some updated status", title: "some updated title", slug: "some updated slug", content: "some updated content", excerpt: "some updated excerpt", featured_image: "some updated featured_image", author_name: "some updated author_name", author_email: "some updated author_email", is_featured: false, view_count: 43, published_at: ~U[2025-09-13 21:33:00Z]}
+
+      update_attrs = %{
+        status: "some updated status",
+        title: "some updated title",
+        slug: "some updated slug",
+        content: "some updated content",
+        excerpt: "some updated excerpt",
+        featured_image: "some updated featured_image",
+        author_name: "some updated author_name",
+        author_email: "some updated author_email",
+        is_featured: false,
+        view_count: 43,
+        published_at: ~U[2025-09-13 21:33:00Z]
+      }
 
       assert {:ok, %Post{} = post} = Blog.update_post(post, update_attrs)
       assert post.status == "some updated status"

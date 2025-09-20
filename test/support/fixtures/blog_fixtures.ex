@@ -42,17 +42,17 @@ defmodule Iarvis.BlogFixtures do
     {:ok, post} =
       attrs
       |> Enum.into(%{
-        author_email: "some author_email",
-        author_name: "some author_name",
+        title: "some title",
+        slug: unique_post_slug(),
         content: "some content",
         excerpt: "some excerpt",
         featured_image: "some featured_image",
+        author_name: "some author_name",
+        author_email: "some author_email",
+        status: "published",
         is_featured: true,
-        published_at: ~U[2025-09-12 21:33:00Z],
-        slug: unique_post_slug(),
-        status: "some status",
-        title: "some title",
-        view_count: 42
+        view_count: 42,
+        published_at: ~U[2025-09-12 21:33:00Z]
       })
       |> Iarvis.Blog.create_post()
 

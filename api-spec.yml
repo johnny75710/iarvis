@@ -187,16 +187,16 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
         - name: limit
           in: query
           schema:
             type: integer
-            default: 10
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
       responses:
         "200":
           description: Lista de artículos de la categoría
@@ -205,14 +205,28 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
+                  posts:
                     type: array
                     items:
                       $ref: '#/components/schemas/Post'
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                          offset:
+                            type: integer
+                          total_count:
+                            type: integer
+                          has_more:
+                            type: boolean
+                          last_id:
+                            type: string
+                            format: uuid
+                            nullable: true
   /tags:
     get:
       summary: Listar tags
@@ -279,7 +293,7 @@ paths:
                     type: integer
                   limit:
                     type: integer
-  /comments:
+
     get:
       summary: Listar comentarios
       parameters:
